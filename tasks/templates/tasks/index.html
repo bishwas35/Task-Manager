@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Task Manager Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15), 
+                        0 0 0 1px rgba(255, 255, 255, 0.05);
+            transform: translateY(0);
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 35px 70px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            margin-bottom: 40px;
+            letter-spacing: -0.02em;
+            animation: slideInDown 0.8s ease-out;
+        }
+
+        .task-form {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 32px;
+            animation: slideInUp 0.8s ease-out 0.2s both;
+        }
+
+        .task-input {
+            flex: 1;
+            padding: 16px 20px;
+            border: 2px solid rgba(102, 126, 234, 0.1);
+            border-radius: 16px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+        }
+
+        .task-input:focus {
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.95);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .task-input::placeholder {
+            color: rgba(118, 75, 162, 0.5);
+            font-weight: 500;
+        }
+
+        .add-btn {
+            padding: 16px 24px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .add-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        .add-btn:hover::before {
+            left: 100%;
+        }
+
+        .add-btn:active {
+            transform: translateY(0);
+        }
+
+        .tasks-container {
+            animation: fadeIn 0.8s ease-out 0.4s both;
+        }
+
+        .task-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .task-item {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 18px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: slideInUp 0.5s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .task-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        .task-item:hover {
+            transform: translateX(8px);
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .task-item:hover::before {
+            width: 100%;
+            opacity: 0.05;
+        }
+
+        .task-text {
+            font-size: 16px;
+            font-weight: 500;
+            color: #2d3748;
+            flex: 1;
+            margin-right: 16px;
+        }
+
+        .delete-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            transform: translateX(10px);
+        }
+
+        .task-item:hover .delete-btn {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .delete-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.4);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: rgba(118, 75, 162, 0.6);
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: block;
+            opacity: 0.3;
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.02);
+            }
+        }
+
+        .task-counter {
+            text-align: center;
+            margin-bottom: 24px;
+            font-size: 14px;
+            color: rgba(118, 75, 162, 0.7);
+            font-weight: 600;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 24px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .task-form {
+                flex-direction: column;
+            }
+            
+            .add-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✨ Task Manager Pro</h1>
+        
+        <form class="task-form" onsubmit="addTask(event)">
+            <input 
+                type="text" 
+                class="task-input" 
+                placeholder="What needs to be done?" 
+                required 
+                id="taskInput"
+            />
+            <button type="submit" class="add-btn">
+                Add Task
+            </button>
+        </form>
+
+        <div class="tasks-container">
+            <div class="task-counter">
+                <span id="taskCount">0</span> tasks remaining
+            </div>
+            
+            <ul class="task-list" id="taskList">
+                <li class="empty-state">
+                    <span class="empty-icon">📝</span>
+                    No tasks yet! Add one above to get started.
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        let tasks = [];
+        let taskIdCounter = 1;
+
+        function updateTaskDisplay() {
+            const taskList = document.getElementById('taskList');
+            const taskCount = document.getElementById('taskCount');
+            
+            taskCount.textContent = tasks.length;
+            
+            if (tasks.length === 0) {
+                taskList.innerHTML = `
+                    <li class="empty-state">
+                        <span class="empty-icon">📝</span>
+                        No tasks yet! Add one above to get started.
+                    </li>
+                `;
+            } else {
+                taskList.innerHTML = tasks.map(task => `
+                    <li class="task-item" style="animation-delay: ${Math.random() * 0.1}s">
+                        <span class="task-text">${task.title}</span>
+                        <button class="delete-btn" onclick="deleteTask(${task.id})">
+                            Delete
+                        </button>
+                    </li>
+                `).join('');
+            }
+        }
+
+        function addTask(event) {
+            event.preventDefault();
+            const input = document.getElementById('taskInput');
+            const taskText = input.value.trim();
+            
+            if (taskText) {
+                const newTask = {
+                    id: taskIdCounter++,
+                    title: taskText
+                };
+                
+                tasks.push(newTask);
+                input.value = '';
+                updateTaskDisplay();
+                
+                // Add a subtle animation to the container
+                document.querySelector('.container').style.animation = 'pulse 0.3s ease-out';
+                setTimeout(() => {
+                    document.querySelector('.container').style.animation = '';
+                }, 300);
+            }
+        }
+
+        function deleteTask(taskId) {
+            tasks = tasks.filter(task => task.id !== taskId);
+            updateTaskDisplay();
+        }
+
+        // Initialize display
+        updateTaskDisplay();
+
+        // Add some subtle background animation
+        document.addEventListener('mousemove', (e) => {
+            const container = document.querySelector('.container');
+            const rect = container.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const rotateX = (y - centerY) / 20;
+            const rotateY = (centerX - x) / 20;
+            
+            container.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-5px)`;
+        });
+
+        document.addEventListener('mouseleave', () => {
+            const container = document.querySelector('.container');
+            container.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)';
+        });
+    </script>
+</body>
+</html>
